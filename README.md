@@ -1,0 +1,1 @@
+# test_django_app_k8s
