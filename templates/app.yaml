@@ -1,33 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: taborski-deployment
+  name: {{ .Release.Name }}-deployment
 spec:
   replicas: 5
   selector:
     matchLabels:
-      app: taborski-app
+      app: {{ .Release.Name }}-app
   template:
     metadata:
       labels:
-        app: taborski-app
+        app: {{ .Release.Name }}-app
     spec:
       containers:
-        - name: test-django
-          image: taborski/test_django_app:v0.2.0
+        - name: {{ .Release.Name }}-containers
+          image: taborski/test_django_app:{{ .Values.image.version }}
           ports:
             - containerPort: 80
-              name: django-port
+              name: {{ .Release.Name }}-port
           livenessProbe:
             httpGet:
-              port: django-port
-            initialDelaySeconds: 15
-            periodSeconds: 5
+              port: {{ .Release.Name }}-port
+            initialDelaySeconds: 5
+            periodSeconds: 15
           readinessProbe:
             httpGet:
-              port: django-port
-            initialDelaySeconds: 15
-            periodSeconds: 5
+              port: {{ .Release.Name }}-port
+            initialDelaySeconds: 5
+            periodSeconds: 15
             successThreshold: 3
           env:
             - name: user
