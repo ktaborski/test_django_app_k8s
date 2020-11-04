@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: taborski-deployment
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: taborski-app
+  template:
+    metadata:
+      labels:
+        app: taborski-app
+    spec:
+      containers:
+        - name: test-django
+          image: taborski/test_django_app
+          ports:
+            - containerPort: 80
+              name: django-port
+          livenessProbe:
+            httpGet:
+              port: django-port
+            initialDelaySeconds: 15
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              port: django-port
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            successThreshold: 3
+          env:
+            - name: user
+              valueFrom: 
+                secretKeyRef:
+                  name: django-app-secrets
+                  key: user
+            - name: password
+              valueFrom: 
+                secretKeyRef:
+                  name: django-app-secrets
+                  key: password
+          volumeMounts:
+            - name: django-app-secrets
+              mountPath: /etc/django-app-secrets
+              readOnly: true
+      volumes:
+        - name: django-app-secrets
+          secret:
+            secretName: django-app-secrets
