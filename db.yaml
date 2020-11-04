@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+spec:
+  replicas: 1
+  serviceName: db-service
+  selector:
+    matchLabels:
+      type: db
+  template:
+    metadata:
+      labels:
+        type: db
+    spec:
+      containers:
+        - name: db
+          image: mysql:8.0
+          ports:
+            - name: db-port
+              containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: root_password
+                  name: db-secret
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  key: user
+                  name: db-secret
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: db-secret
+            - name: MYSQL_ROOT_HOST
+              value: "%"
+            - name: MYSQL_DATABASE
+              value: "db"
+          volumeMounts:
+            - name: db-volume
+              mountPath: /var/lib/mysql
+          readinessProbe:
+            exec:
+              command: ['bash', '-c', 'mysql -h 127.0.0.1 -e "SELECT 1" -u"${MYSQL_USER}" -p"${MYSQL_PASSWORD}"']
+  volumeClaimTemplates:
+    - metadata:
+        name: db-volume
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 300M
