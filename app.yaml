@@ -40,6 +40,8 @@ spec:
                 secretKeyRef:
                   name: django-app-secrets
                   key: password
+            - name: APP_DJANGO_PORT
+              value: "80"
           volumeMounts:
             - name: django-app-secrets
               mountPath: /etc/django-app-secrets
